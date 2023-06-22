@@ -3,7 +3,7 @@ import { ICredentialType, INodeProperties, } from 'n8n-workflow';
 export class BaleMessengerApi implements ICredentialType {
 	name = 'baleMessengerApi';
 	displayName = 'BaleMessenger API';
-	documentationUrl = '<your-docs-url>';
+	documentationUrl = 'https://dev.bale.ai/';
 	properties: INodeProperties[] = [
 		{
 			displayName: 'API Token',
