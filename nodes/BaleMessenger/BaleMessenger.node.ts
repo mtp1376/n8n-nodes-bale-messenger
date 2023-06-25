@@ -1,5 +1,5 @@
 import { INodeExecutionData, INodeType, INodeTypeDescription } from 'n8n-workflow';
-import { BINARY_ENCODING, IExecuteFunctions } from "n8n-core";
+import { BINARY_ENCODING, IExecuteFunctions } from 'n8n-core';
 import { default as TelegramBot } from 'node-telegram-bot-api';
 
 export class BaleMessenger implements INodeType {
@@ -77,17 +77,12 @@ export class BaleMessenger implements INodeType {
 				default: '',
 				displayOptions: {
 					show: {
-						operation: [
-							'sendDocument',
-							'sendMessage',
-							'sendPhoto',
-						],
+						operation: ['sendDocument', 'sendMessage', 'sendPhoto'],
 						resource: ['chat', 'message'],
 					},
 				},
 				required: true,
-				description:
-					'Unique identifier for the target chat',
+				description: 'Unique identifier for the target chat',
 			},
 
 			{
@@ -98,17 +93,13 @@ export class BaleMessenger implements INodeType {
 				required: true,
 				displayOptions: {
 					show: {
-						operation: [
-							'sendDocument',
-							'sendPhoto',
-						],
+						operation: ['sendDocument', 'sendPhoto'],
 						resource: ['message'],
 					},
 				},
 				placeholder: '',
 				description: 'Name of the binary property that contains the data to upload',
 			},
-
 
 			{
 				displayName: 'Text',
@@ -118,13 +109,12 @@ export class BaleMessenger implements INodeType {
 				default: '',
 				displayOptions: {
 					show: {
-						operation: ['editMessageText', 'sendMessage'],
+						operation: ['sendMessage'],
 						resource: ['message'],
 					},
 				},
 				description: 'Text of the message to be sent',
 			},
-
 		],
 	};
 
@@ -135,7 +125,9 @@ export class BaleMessenger implements INodeType {
 		const credentials = await this.getCredentials('baleMessengerApi');
 		// credentials.token
 
-		const bot = new TelegramBot(credentials.token as string, { baseApiUrl: 'https://tapi.bale.ai' });
+		const bot = new TelegramBot(credentials.token as string, {
+			baseApiUrl: 'https://tapi.bale.ai',
+		});
 
 		for (let i = 0; i < items.length; i++) {
 			const chatId = this.getNodeParameter('chatId', i) as string;
@@ -145,7 +137,7 @@ export class BaleMessenger implements INodeType {
 				const res = await bot.sendMessage(chatId, text);
 				returnData.push({
 					json: {
-						...res
+						...res,
 					},
 					binary: {},
 					pairedItem: { item: i },
@@ -157,7 +149,7 @@ export class BaleMessenger implements INodeType {
 				const itemBinaryData = items[i].binary![binaryPropertyName];
 				const uploadData = Buffer.from(itemBinaryData.data, BINARY_ENCODING);
 
-				await bot.sendDocument(chatId, uploadData, {}, { filename: itemBinaryData.fileName })
+				await bot.sendDocument(chatId, uploadData, {}, { filename: itemBinaryData.fileName });
 			}
 
 			if (operation === 'sendPhoto') {
@@ -165,7 +157,7 @@ export class BaleMessenger implements INodeType {
 				const itemBinaryData = items[i].binary![binaryPropertyName];
 				const uploadData = Buffer.from(itemBinaryData.data, BINARY_ENCODING);
 
-				await bot.sendPhoto(chatId, uploadData, {})
+				await bot.sendPhoto(chatId, uploadData, {});
 			}
 		}
 

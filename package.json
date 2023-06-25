@@ -33,7 +33,8 @@
       "dist/credentials/BaleMessengerApi.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/BaleMessenger/BaleMessenger.node.js"
+      "dist/nodes/BaleMessenger/BaleMessenger.node.js",
+      "dist/nodes/BaleMessenger/BaleMessengerTrigger.node.js"
     ]
   },
   "devDependencies": {

@@ -1,5 +1,5 @@
 {
-	"node": "n8n-nodes-base.balemessenger",
+	"node": "n8n-nodes-base.balemessengerTrigger",
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
 	"categories": ["Communication"],

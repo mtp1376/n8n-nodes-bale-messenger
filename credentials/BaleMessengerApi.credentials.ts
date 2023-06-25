@@ -1,4 +1,4 @@
-import { ICredentialType, INodeProperties, } from 'n8n-workflow';
+import { ICredentialType, INodeProperties } from 'n8n-workflow';
 
 export class BaleMessengerApi implements ICredentialType {
 	name = 'baleMessengerApi';
@@ -11,11 +11,10 @@ export class BaleMessengerApi implements ICredentialType {
 			type: 'string',
 			default: '',
 			typeOptions: {
-				password: true
+				password: true,
 			},
 			placeholder: 'BotFather token',
-			description: 'You can get a token for your bot from @botfather'
+			description: 'You can get a token for your bot from @botfather',
 		},
 	];
-
 }
