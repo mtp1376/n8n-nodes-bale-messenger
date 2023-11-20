@@ -86,6 +86,24 @@ export class BaleMessenger implements INodeType {
 			},
 
 			{
+				displayName: 'Binary Data',
+				name: 'binaryData',
+				type: 'boolean',
+				default: false,
+				required: true,
+				displayOptions: {
+					show: {
+						operation: [
+							'sendDocument',
+							'sendPhoto',
+						],
+						resource: ['message'],
+					},
+				},
+				description: 'Whether the data to upload should be taken from binary field',
+			},
+
+			{
 				displayName: 'Binary Property',
 				name: 'binaryPropertyName',
 				type: 'string',
@@ -93,12 +111,34 @@ export class BaleMessenger implements INodeType {
 				required: true,
 				displayOptions: {
 					show: {
-						operation: ['sendDocument', 'sendPhoto'],
+						operation: [
+							'sendDocument',
+							'sendPhoto',
+						],
 						resource: ['message'],
+						binaryData: [true],
 					},
 				},
 				placeholder: '',
 				description: 'Name of the binary property that contains the data to upload',
+			},
+
+			{
+				displayName: 'File ID',
+				name: 'fileId',
+				type: 'string',
+				default: '',
+				displayOptions: {
+					show: {
+						operation: [
+							'sendDocument', 'sendPhoto'
+						],
+						resource: ['message'],
+						binaryData: [false],
+					},
+				},
+				description:
+					'Pass a file_id to send a file that exists on the Bale servers',
 			},
 
 			{
@@ -124,6 +164,8 @@ export class BaleMessenger implements INodeType {
 		const operation = this.getNodeParameter('operation', 0);
 		const credentials = await this.getCredentials('baleMessengerApi');
 		// credentials.token
+		const binaryData = this.getNodeParameter('binaryData', 0, false);
+
 
 		const bot = new TelegramBot(credentials.token as string, {
 			baseApiUrl: 'https://tapi.bale.ai',
@@ -145,19 +187,31 @@ export class BaleMessenger implements INodeType {
 			}
 
 			if (operation === 'sendDocument') {
-				const binaryPropertyName = this.getNodeParameter('binaryPropertyName', 0) as string;
-				const itemBinaryData = items[i].binary![binaryPropertyName];
-				const uploadData = Buffer.from(itemBinaryData.data, BINARY_ENCODING);
+				if (binaryData) {
+					const binaryPropertyName = this.getNodeParameter('binaryPropertyName', 0) as string;
+					const itemBinaryData = items[i].binary![binaryPropertyName];
+					const uploadData = Buffer.from(itemBinaryData.data, BINARY_ENCODING);
 
-				await bot.sendDocument(chatId, uploadData, {}, { filename: itemBinaryData.fileName });
+					await bot.sendDocument(chatId, uploadData, {}, { filename: itemBinaryData.fileName });
+				} else {
+					// file_id passed
+					const fileId = this.getNodeParameter('fileId', 0) as string;
+					await bot.sendDocument(chatId, fileId);
+				}
 			}
 
 			if (operation === 'sendPhoto') {
-				const binaryPropertyName = this.getNodeParameter('binaryPropertyName', 0) as string;
-				const itemBinaryData = items[i].binary![binaryPropertyName];
-				const uploadData = Buffer.from(itemBinaryData.data, BINARY_ENCODING);
+				if (binaryData) {
+					const binaryPropertyName = this.getNodeParameter('binaryPropertyName', 0) as string;
+					const itemBinaryData = items[i].binary![binaryPropertyName];
+					const uploadData = Buffer.from(itemBinaryData.data, BINARY_ENCODING);
 
-				await bot.sendPhoto(chatId, uploadData, {});
+					await bot.sendPhoto(chatId, uploadData);
+				} else {
+					// file_id passed
+					const fileId = this.getNodeParameter('fileId', 0) as string;
+					await bot.sendPhoto(chatId, fileId);
+				}
 			}
 		}
 
