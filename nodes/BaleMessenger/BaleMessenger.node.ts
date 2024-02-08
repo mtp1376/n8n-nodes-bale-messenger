@@ -117,6 +117,26 @@ export class BaleMessenger implements INodeType {
 						description: 'Send an audio file',
 						action: 'Send an audio file',
 					},
+					// amir nezami ghanges starts here \\
+					{
+						name: 'Send Sticker',
+						value: 'sendSticker',
+						description: 'Send a sticker',
+						action: 'Send a sticker',
+					},
+					{
+						name: 'Delete Chat Message',
+						value: 'deleteMessage',
+						description: 'Delete a chat message',
+						action: 'Delete a chat message',
+					},
+					{
+						name: 'Send Chat Action',
+						value: 'sendChatAction',
+						description: 'Send a chat action',
+						action: 'Send a chat action',
+					},
+				// amir nezami ghanges ends here \\
 				],
 				default: 'sendMessage',
 			},
@@ -128,7 +148,16 @@ export class BaleMessenger implements INodeType {
 				default: '',
 				displayOptions: {
 					show: {
-						operation: ['sendDocument', 'sendMessage', 'sendPhoto', 'sendAudio', 'sendVideo'],
+						operation: [
+							'sendDocument',
+							'sendMessage',
+							'sendPhoto',
+							'sendAudio',
+							'sendVideo',
+							'SendSticker',
+							'deleteMessage',
+							'sendChatAction',
+						],
 						resource: ['chat', 'message'],
 					},
 				},
@@ -149,6 +178,7 @@ export class BaleMessenger implements INodeType {
 							'sendPhoto',
 							'sendAudio',
 							'sendVideo',
+							'SendSticker',
 						],
 						resource: ['message'],
 					},
@@ -169,6 +199,7 @@ export class BaleMessenger implements INodeType {
 							'sendPhoto',
 							'sendAudio',
 							'sendVideo',
+							'SendSticker',
 						],
 						resource: ['message'],
 						binaryData: [true],
@@ -405,19 +436,116 @@ export class BaleMessenger implements INodeType {
 					},
 				],
 			},
+			// amir nezami ghanges starts here \\
 			{
 				displayName: 'Reply To Message ID',
 				name: 'reply_to_message_id',
 				type: 'number',
 				displayOptions: {
 					show: {
-						operation: ['sendDocument', 'sendMessage', 'sendPhoto', 'sendAudio', 'sendVideo'],
+						operation: ['sendDocument', 'sendMessage', 'sendPhoto', 'sendAudio', 'sendVideo', 'SendSticker'],
 						resource: ['chat', 'message'],
 					},
 				},
 				default: 0,
 				description: 'If the message is a reply, ID of the original message',
 			},
+			{
+				displayName: 'Sticker',
+				name: 'file',
+				type: 'string',
+				default: '',
+				displayOptions: {
+					show: {
+						operation: ['sendSticker'],
+						resource: ['message'],
+						binaryData: [false],
+					},
+				},
+				description:
+					'Sticker to send. Pass a file_id to send a file that exists on the Telegram servers (recommended), an HTTP URL for Telegram to get a .webp file from the Internet.',
+			},
+			{
+				displayName: 'Message ID',
+				name: 'messageId',
+				type: 'string',
+				default: '',
+				displayOptions: {
+					show: {
+						operation: ['deleteMessage'],
+						resource: ['message'],
+					},
+				},
+				required: true,
+				description: 'Unique identifier of the message to delete',
+			},
+			{
+				displayName: 'Action',
+				name: 'action',
+				type: 'options',
+				displayOptions: {
+					show: {
+						operation: ['sendChatAction'],
+						resource: ['message'],
+					},
+				},
+				options: [
+					{
+						name: 'Find Location',
+						value: 'find_location',
+						action: 'Find location',
+					},
+					{
+						name: 'Record Audio',
+						value: 'record_audio',
+						action: 'Record audio',
+					},
+					{
+						name: 'Record Video',
+						value: 'record_video',
+						action: 'Record video',
+					},
+					{
+						name: 'Record Video Note',
+						value: 'record_video_note',
+						action: 'Record video note',
+					},
+					{
+						name: 'Typing',
+						value: 'typing',
+						action: 'Typing a message',
+					},
+					{
+						name: 'Upload Audio',
+						value: 'upload_audio',
+						action: 'Upload audio',
+					},
+					{
+						name: 'Upload Document',
+						value: 'upload_document',
+						action: 'Upload document',
+					},
+					{
+						name: 'Upload Photo',
+						value: 'upload_photo',
+						action: 'Upload photo',
+					},
+					{
+						name: 'Upload Video',
+						value: 'upload_video',
+						action: 'Upload video',
+					},
+					{
+						name: 'Upload Video Note',
+						value: 'upload_video_note',
+						action: 'Upload video note',
+					},
+				],
+				default: 'typing',
+				description:
+					'Type of action to broadcast. Choose one, depending on what the user is about to receive. The status is set for 5 seconds or less (when a message arrives from your bot).',
+			},
+			// amir nezami ghanges ends here \\
 		],
 	};
 
