@@ -3,7 +3,6 @@
  */
 module.exports = {
 	extends: "./.eslintrc.js",
-
 	overrides: [
 		{
 			files: ['package.json'],
