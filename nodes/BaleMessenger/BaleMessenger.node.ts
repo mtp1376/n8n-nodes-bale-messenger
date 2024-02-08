@@ -1,6 +1,6 @@
 import { INodeExecutionData, INodeType, INodeTypeDescription } from 'n8n-workflow';
 import { BINARY_ENCODING, IExecuteFunctions } from 'n8n-core';
-import { default as TelegramBot } from 'node-telegram-bot-api';
+import { ChatAction, default as TelegramBot } from 'node-telegram-bot-api';
 
 function getMarkup(this: IExecuteFunctions, i: number) {
 	const replyMarkupOption = this.getNodeParameter('replyMarkup', i) as string;
@@ -130,8 +130,6 @@ export class BaleMessenger implements INodeType {
 						description: 'Delete a chat message',
 						action: 'Delete a chat message',
 					},
-
-				// amir nezami changes ends here \\
 				],
 				default: 'sendMessage',
 			},
@@ -168,13 +166,7 @@ export class BaleMessenger implements INodeType {
 				required: true,
 				displayOptions: {
 					show: {
-						operation: [
-							'sendDocument',
-							'sendPhoto',
-							'sendAudio',
-							'sendVideo',
-							'SendSticker',
-						],
+						operation: ['sendDocument', 'sendPhoto', 'sendAudio', 'sendVideo', 'SendSticker'],
 						resource: ['message'],
 					},
 				},
@@ -189,13 +181,7 @@ export class BaleMessenger implements INodeType {
 				required: true,
 				displayOptions: {
 					show: {
-						operation: [
-							'sendDocument',
-							'sendPhoto',
-							'sendAudio',
-							'sendVideo',
-							'SendSticker',
-						],
+						operation: ['sendDocument', 'sendPhoto', 'sendAudio', 'sendVideo', 'SendSticker'],
 						resource: ['message'],
 						binaryData: [true],
 					},
@@ -211,15 +197,12 @@ export class BaleMessenger implements INodeType {
 				default: '',
 				displayOptions: {
 					show: {
-						operation: [
-							'sendDocument', 'sendPhoto', 'sendAudio', 'sendVideo'
-						],
+						operation: ['sendDocument', 'sendPhoto', 'sendAudio', 'sendVideo'],
 						resource: ['message'],
 						binaryData: [false],
 					},
 				},
-				description:
-					'Pass a file_id to send a file that exists on the Bale servers',
+				description: 'Pass a file_id to send a file that exists on the Bale servers',
 			},
 
 			{
@@ -242,13 +225,7 @@ export class BaleMessenger implements INodeType {
 				name: 'replyMarkup',
 				displayOptions: {
 					show: {
-						operation: [
-							'sendDocument',
-							'sendMessage',
-							'sendPhoto',
-							'sendAudio',
-							'sendVideo',
-						],
+						operation: ['sendDocument', 'sendMessage', 'sendPhoto', 'sendAudio', 'sendVideo'],
 						resource: ['message'],
 					},
 				},
@@ -434,11 +411,18 @@ export class BaleMessenger implements INodeType {
 			// amir nezami changes starts here \\
 			{
 				displayName: 'Reply To Message ID',
-				name: 'reply_to_message_id',
+				name: 'replyToMessageId',
 				type: 'number',
 				displayOptions: {
 					show: {
-						operation: ['sendDocument', 'sendMessage', 'sendPhoto', 'sendAudio', 'sendVideo', 'SendSticker'],
+						operation: [
+							'sendDocument',
+							'sendMessage',
+							'sendPhoto',
+							'sendAudio',
+							'sendVideo',
+							'SendSticker',
+						],
 						resource: ['chat', 'message'],
 					},
 				},
@@ -486,7 +470,6 @@ export class BaleMessenger implements INodeType {
 		const credentials = await this.getCredentials('baleMessengerApi');
 		const binaryData = this.getNodeParameter('binaryData', 0, false);
 
-
 		const bot = new TelegramBot(credentials.token as string, {
 			baseApiUrl: 'https://tapi.bale.ai',
 		});
@@ -496,9 +479,11 @@ export class BaleMessenger implements INodeType {
 
 			if (operation === 'sendMessage') {
 				const text = this.getNodeParameter('text', i) as string;
+				const replyToMessageId = this.getNodeParameter('replyToMessageId', i) as number;
 
 				const res = await bot.sendMessage(chatId, text, {
-					reply_markup: getMarkup.call(this, i)
+					reply_markup: getMarkup.call(this, i),
+					reply_to_message_id: replyToMessageId
 				});
 				returnData.push({
 					json: {
@@ -526,60 +511,42 @@ export class BaleMessenger implements INodeType {
 			}
 
 			if (operation === 'deleteMessage') {
-			  const messageId = this.getNodeParameter('messageId', i) as string;
+				const messageId = this.getNodeParameter('messageId', i) as number;
 
-  			const res = await bot.deleteMessage(chatId, messageId);
+				await bot.deleteMessage(chatId, messageId);
 
-  			returnData.push({
-    		json: {
-      		messageDeleted: true,
-    		},
-    		binary: {},
-    		pairedItem: { item: i },
-  			});
-			} 
-
-			if (operation === 'sendChatAction') {
-  			const action = this.getNodeParameter('action', i) as string;
-
-  			const res = await bot.sendChatAction(chatId, action);
-
-  			returnData.push({
-    		json: {
-      		actionSent: action,
-    		},
-    		binary: {},
-    		pairedItem: { item: i },
-  			});
+				returnData.push({
+					json: {
+						messageDeleted: true,
+					},
+					binary: {},
+					pairedItem: { item: i },
+				});
 			}
 
-			if (operation === 'replyToMessage') {
-  			const text = this.getNodeParameter('text', i) as string;
-  			const messageId = this.getNodeParameter('reply_to_message_id', i) as string;
+			if (operation === 'sendChatAction') {
+				const action = this.getNodeParameter('action', i) as ChatAction;
 
-  			const res = await bot.sendMessage(chatId, text, {
-    			reply_to_message_id: messageId,
-    			reply_markup: getMarkup.call(this, i)
-  			});
+				await bot.sendChatAction(chatId, action);
 
-  			returnData.push({
-    		json: {
-      		...res,
-    		},
-    		binary: {},
-    		pairedItem: { item: i },
-  			});
+				returnData.push({
+					json: {
+						actionSent: action,
+					},
+					binary: {},
+					pairedItem: { item: i },
+				});
 			}
 
 			if (['sendDocument', 'sendPhoto', 'sendAudio', 'sendVideo'].includes(operation)) {
 				let fileOptions = undefined;
 				let uploadData = undefined;
-				const options = { reply_markup: getMarkup.call(this, i) }
+				const options = { reply_markup: getMarkup.call(this, i) };
 				if (binaryData) {
 					const binaryPropertyName = this.getNodeParameter('binaryPropertyName', 0) as string;
 					const itemBinaryData = items[i].binary![binaryPropertyName];
 					uploadData = Buffer.from(itemBinaryData.data, BINARY_ENCODING);
-					fileOptions = { filename: itemBinaryData.fileName }
+					fileOptions = { filename: itemBinaryData.fileName };
 				} else {
 					// file_id passed
 					uploadData = this.getNodeParameter('fileId', 0) as string;
