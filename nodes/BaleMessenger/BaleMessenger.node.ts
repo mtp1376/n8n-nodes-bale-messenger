@@ -154,7 +154,7 @@ export class BaleMessenger implements INodeType {
 							'sendPhoto',
 							'sendAudio',
 							'sendVideo',
-							'SendSticker',
+							'sendSticker',
 							'deleteMessage',
 							'sendChatAction',
 						],
@@ -173,7 +173,7 @@ export class BaleMessenger implements INodeType {
 				required: true,
 				displayOptions: {
 					show: {
-						operation: ['sendDocument', 'sendPhoto', 'sendAudio', 'sendVideo', 'SendSticker'],
+						operation: ['sendDocument', 'sendPhoto', 'sendAudio', 'sendVideo'],
 						resource: ['message'],
 					},
 				},
@@ -188,7 +188,7 @@ export class BaleMessenger implements INodeType {
 				required: true,
 				displayOptions: {
 					show: {
-						operation: ['sendDocument', 'sendPhoto', 'sendAudio', 'sendVideo', 'SendSticker'],
+						operation: ['sendDocument', 'sendPhoto', 'sendAudio', 'sendVideo', 'sendSticker'],
 						resource: ['message'],
 						binaryData: [true],
 					},
@@ -428,7 +428,7 @@ export class BaleMessenger implements INodeType {
 							'sendPhoto',
 							'sendAudio',
 							'sendVideo',
-							'SendSticker',
+							'sendSticker',
 						],
 						resource: ['chat', 'message'],
 					},
@@ -437,19 +437,18 @@ export class BaleMessenger implements INodeType {
 				description: 'If the message is a reply, ID of the original message',
 			},
 			{
-				displayName: 'Sticker',
-				name: 'file',
+				displayName: 'Sticker Id',
+				name: 'stickerId',
 				type: 'string',
 				default: '',
 				displayOptions: {
 					show: {
 						operation: ['sendSticker'],
 						resource: ['message'],
-						binaryData: [false],
 					},
 				},
 				description:
-					'Sticker to send. Pass a file_id to send a file that exists on the Telegram servers (recommended), an HTTP URL for Telegram to get a .webp file from the Internet.',
+					'Sticker to send. Pass a file_id to send a file that exists on the Bale servers (recommended)',
 			},
 			{
 				displayName: 'Message ID',
@@ -568,9 +567,10 @@ export class BaleMessenger implements INodeType {
 
 			if (operation === 'sendSticker') {
 				const stickerId = this.getNodeParameter('stickerId', i) as string;
+				const replyToMessageId = this.getNodeParameter('replyToMessageId', i) as number;
 
 				const res = await bot.sendSticker(chatId, stickerId, {
-					reply_markup: getMarkup.call(this, i),
+					reply_to_message_id: replyToMessageId
 				});
 
 				returnData.push({
