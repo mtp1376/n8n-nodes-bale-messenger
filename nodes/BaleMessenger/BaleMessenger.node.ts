@@ -405,6 +405,19 @@ export class BaleMessenger implements INodeType {
 					},
 				],
 			},
+			{
+				displayName: 'Reply To Message ID',
+				name: 'reply_to_message_id',
+				type: 'number',
+				displayOptions: {
+					show: {
+						operation: ['sendDocument', 'sendMessage', 'sendPhoto', 'sendAudio', 'sendVideo'],
+						resource: ['chat', 'message'],
+					},
+				},
+				default: 0,
+				description: 'If the message is a reply, ID of the original message',
+			},
 		],
 	};
 
