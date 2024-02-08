@@ -117,7 +117,7 @@ export class BaleMessenger implements INodeType {
 						description: 'Send an audio file',
 						action: 'Send an audio file',
 					},
-					// amir nezami ghanges starts here \\
+					// amir nezami changes starts here \\
 					{
 						name: 'Send Sticker',
 						value: 'sendSticker',
@@ -136,7 +136,7 @@ export class BaleMessenger implements INodeType {
 						description: 'Send a chat action',
 						action: 'Send a chat action',
 					},
-				// amir nezami ghanges ends here \\
+				// amir nezami changes ends here \\
 				],
 				default: 'sendMessage',
 			},
@@ -436,7 +436,7 @@ export class BaleMessenger implements INodeType {
 					},
 				],
 			},
-			// amir nezami ghanges starts here \\
+			// amir nezami changes starts here \\
 			{
 				displayName: 'Reply To Message ID',
 				name: 'reply_to_message_id',
@@ -545,7 +545,7 @@ export class BaleMessenger implements INodeType {
 				description:
 					'Type of action to broadcast. Choose one, depending on what the user is about to receive. The status is set for 5 seconds or less (when a message arrives from your bot).',
 			},
-			// amir nezami ghanges ends here \\
+			// amir nezami changes ends here \\
 		],
 	};
 
@@ -577,6 +577,68 @@ export class BaleMessenger implements INodeType {
 					binary: {},
 					pairedItem: { item: i },
 				});
+			}
+
+			if (operation === 'sendSticker') {
+				  const stickerId = this.getNodeParameter('stickerId', i) as string;
+				
+				  const res = await bot.sendSticker(chatId, stickerId, {
+	    		reply_markup: getMarkup.call(this, i)
+  			});
+
+  			returnData.push({
+    		json: {
+      		...res,
+    		},
+    		binary: {},
+    		pairedItem: { item: i },
+  			});
+			}
+
+			if (operation === 'deleteMessage') {
+			  const messageId = this.getNodeParameter('messageId', i) as string;
+
+  			const res = await bot.deleteMessage(chatId, messageId);
+
+  			returnData.push({
+    		json: {
+      		messageDeleted: true,
+    		},
+    		binary: {},
+    		pairedItem: { item: i },
+  			});
+			} 
+
+			if (operation === 'sendChatAction') {
+  			const action = this.getNodeParameter('action', i) as string;
+
+  			const res = await bot.sendChatAction(chatId, action);
+
+  			returnData.push({
+    		json: {
+      		actionSent: action,
+    		},
+    		binary: {},
+    		pairedItem: { item: i },
+  			});
+			}
+
+			if (operation === 'replyToMessage') {
+  			const text = this.getNodeParameter('text', i) as string;
+  			const messageId = this.getNodeParameter('reply_to_message_id', i) as string;
+
+  			const res = await bot.sendMessage(chatId, text, {
+    			reply_to_message_id: messageId,
+    			reply_markup: getMarkup.call(this, i)
+  			});
+
+  			returnData.push({
+    		json: {
+      		...res,
+    		},
+    		binary: {},
+    		pairedItem: { item: i },
+  			});
 			}
 
 			if (['sendDocument', 'sendPhoto', 'sendAudio', 'sendVideo'].includes(operation)) {
