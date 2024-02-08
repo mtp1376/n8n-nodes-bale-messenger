@@ -29,8 +29,7 @@ export class BaleMessengerTrigger implements INodeType {
 				path: 'webhook',
 			},
 		],
-		properties: [
-		],
+		properties: [],
 	};
 
 	webhookMethods = {
@@ -76,5 +75,4 @@ export class BaleMessengerTrigger implements INodeType {
 			workflowData: [this.helpers.returnJsonArray(body)],
 		};
 	}
-
 }
