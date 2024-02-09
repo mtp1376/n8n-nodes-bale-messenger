@@ -88,6 +88,24 @@ export class BaleMessenger implements INodeType {
 				},
 				options: [
 					{
+						name: 'Delete Chat Message',
+						value: 'deleteMessage',
+						description: 'Delete a chat message',
+						action: 'Delete a chat message',
+					},
+					{
+						name: 'Send Audio',
+						value: 'sendAudio',
+						description: 'Send an audio file',
+						action: 'Send an audio file',
+					},
+					{
+						name: 'Send Chat Action',
+						value: 'sendChatAction',
+						description: 'Send a chat action',
+						action: 'Send a chat action',
+					},
+					{
 						name: 'Send Document',
 						value: 'sendDocument',
 						description: 'Send a document',
@@ -106,37 +124,17 @@ export class BaleMessenger implements INodeType {
 						action: 'Send a photo message',
 					},
 					{
-						name: 'Send Video',
-						value: 'sendVideo',
-						description: 'Send a video',
-						action: 'Send a video',
-					},
-					{
-						name: 'Send Audio',
-						value: 'sendAudio',
-						description: 'Send an audio file',
-						action: 'Send an audio file',
-					},
-					// amir nezami changes starts here \\
-					{
 						name: 'Send Sticker',
 						value: 'sendSticker',
 						description: 'Send a sticker',
 						action: 'Send a sticker',
 					},
 					{
-						name: 'Delete Chat Message',
-						value: 'deleteMessage',
-						description: 'Delete a chat message',
-						action: 'Delete a chat message',
+						name: 'Send Video',
+						value: 'sendVideo',
+						description: 'Send a video',
+						action: 'Send a video',
 					},
-					{
-						name: 'Send Chat Action',
-						value: 'sendChatAction',
-						description: 'Send a chat action',
-						action: 'Send a chat action',
-					},
-					// amir nezami changes ends here \\
 				],
 				default: 'sendMessage',
 			},
@@ -437,7 +435,7 @@ export class BaleMessenger implements INodeType {
 				description: 'If the message is a reply, ID of the original message',
 			},
 			{
-				displayName: 'Sticker Id',
+				displayName: 'Sticker ID',
 				name: 'stickerId',
 				type: 'string',
 				default: '',
@@ -448,7 +446,7 @@ export class BaleMessenger implements INodeType {
 					},
 				},
 				description:
-					'Sticker to send. Pass a file_id to send a file that exists on the Bale servers (recommended)',
+					'Sticker to send. Pass a file_id to send a file that exists on the Bale servers (recommended).',
 			},
 			{
 				displayName: 'Message ID',
@@ -554,7 +552,7 @@ export class BaleMessenger implements INodeType {
 
 				const res = await bot.sendMessage(chatId, text, {
 					reply_markup: getMarkup.call(this, i),
-					reply_to_message_id: replyToMessageId
+					reply_to_message_id: replyToMessageId,
 				});
 				returnData.push({
 					json: {
@@ -570,7 +568,7 @@ export class BaleMessenger implements INodeType {
 				const replyToMessageId = this.getNodeParameter('replyToMessageId', i) as number;
 
 				const res = await bot.sendSticker(chatId, stickerId, {
-					reply_to_message_id: replyToMessageId
+					reply_to_message_id: replyToMessageId,
 				});
 
 				returnData.push({
