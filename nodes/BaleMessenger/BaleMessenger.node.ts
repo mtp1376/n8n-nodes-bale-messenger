@@ -72,6 +72,10 @@ export class BaleMessenger implements INodeType {
 						name: 'Message',
 						value: 'message',
 					},
+					{
+						name: 'Chat',
+						value: 'chat',
+					},
 				],
 				default: 'message',
 			},
@@ -83,7 +87,7 @@ export class BaleMessenger implements INodeType {
 				noDataExpression: true,
 				displayOptions: {
 					show: {
-						resource: ['message'],
+						resource: ['message', 'chat'],
 					},
 				},
 				options: [
@@ -137,7 +141,29 @@ export class BaleMessenger implements INodeType {
 					},
 				],
 				default: 'sendMessage',
+				displayOptions: {
+					show: {
+						resousce: ['message'],
 			},
+					{
+				displayName: 'Operation',
+				name: 'operation',
+				type: 'options',
+				noDataExpression: true,
+				options: [
+					{
+						name: 'GetChat',
+						value: 'GetChat',
+						description: 'Get up to date information about a chat',
+						action: 'Get a chat',
+					},
+				],
+				default: 'get',
+				displayOptions: {
+					show: {
+						resource: ['chat'],
+					},
+				},
 
 			{
 				displayName: 'Chat ID',
@@ -546,6 +572,7 @@ export class BaleMessenger implements INodeType {
 		for (let i = 0; i < items.length; i++) {
 			const chatId = this.getNodeParameter('chatId', i) as string;
 
+			if (resource === 'message'){
 			if (operation === 'sendMessage') {
 				const text = this.getNodeParameter('text', i) as string;
 				const replyToMessageId = this.getNodeParameter('replyToMessageId', i) as number;
@@ -616,6 +643,13 @@ export class BaleMessenger implements INodeType {
 					await bot.sendAudio(chatId, uploadData, options, fileOptions);
 				else if (operation === 'sendVideo')
 					await bot.sendVideo(chatId, uploadData, options, fileOptions);
+			}else if (resource === 'chat') {
+					if (operation === 'getChat') {
+
+						endpoint = 'getChat';
+
+						body.chat_id = this.getNodeParameter('chatId', i) as string;
+					}
 			}
 		}
 
