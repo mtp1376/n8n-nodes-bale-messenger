@@ -486,7 +486,7 @@ export class BaleMessenger implements INodeType {
 					reply_markup: getMarkup.call(this, i),
 					reply_to_message_id: replyToMessageId
 					});	
-				}catch{
+				}catch (error){
 					
 				}
 				
