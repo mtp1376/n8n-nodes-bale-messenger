@@ -481,10 +481,15 @@ export class BaleMessenger implements INodeType {
 				const text = this.getNodeParameter('text', i) as string;
 				const replyToMessageId = this.getNodeParameter('replyToMessageId', i) as number;
 
-				const res = await bot.sendMessage(chatId, text, {
+				try{
+					const res = await bot.sendMessage(chatId, text, {
 					reply_markup: getMarkup.call(this, i),
 					reply_to_message_id: replyToMessageId
-				});
+					});	
+				}catch{
+					
+				}
+				
 				returnData.push({
 					json: {
 						...res,
