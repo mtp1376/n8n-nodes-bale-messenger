@@ -1,4 +1,4 @@
-import { INodeExecutionData, INodeType, INodeTypeDescription } from 'n8n-workflow';
+import { INodeExecutionData, INodeType, INodeTypeDescription, IDataObject } from 'n8n-workflow';
 import { BINARY_ENCODING, IExecuteFunctions } from 'n8n-core';
 import { default as TelegramBot } from 'node-telegram-bot-api';
 
@@ -86,25 +86,8 @@ export class BaleMessenger implements INodeType {
 						resource: ['message'],
 					},
 				},
+				// eslint-disable-next-line n8n-nodes-base/node-param-options-type-unsorted-items
 				options: [
-					{
-						name: 'Delete Chat Message',
-						value: 'deleteMessage',
-						description: 'Delete a chat message',
-						action: 'Delete a chat message',
-					},
-					{
-						name: 'Send Audio',
-						value: 'sendAudio',
-						description: 'Send an audio file',
-						action: 'Send an audio file',
-					},
-					{
-						name: 'Send Chat Action',
-						value: 'sendChatAction',
-						description: 'Send a chat action',
-						action: 'Send a chat action',
-					},
 					{
 						name: 'Send Document',
 						value: 'sendDocument',
@@ -124,20 +107,134 @@ export class BaleMessenger implements INodeType {
 						action: 'Send a photo message',
 					},
 					{
-						name: 'Send Sticker',
-						value: 'sendSticker',
-						description: 'Send a sticker',
-						action: 'Send a sticker',
-					},
-					{
 						name: 'Send Video',
 						value: 'sendVideo',
 						description: 'Send a video',
 						action: 'Send a video',
 					},
+					{
+						name: 'Send Audio',
+						value: 'sendAudio',
+						description: 'Send an audio file',
+						action: 'Send an audio file',
+					},
+					{
+						name: 'Edit Message Text',
+						value: 'editMessageText',
+						description: 'Edit a text message',
+						action: 'Edit a test message',
+					},
 				],
 				default: 'sendMessage',
 			},
+
+			// edit message
+			{
+				displayName: 'Message Type',
+				name: 'messageType',
+				type: 'options',
+				displayOptions: {
+					show: {
+						operation: ['editMessageText'],
+						resource: ['message'],
+					},
+				},
+				options: [
+					{
+						name: 'Inline Message',
+						value: 'inlineMessage',
+					},
+					{
+						name: 'Message',
+						value: 'message',
+					},
+				],
+				default: 'message',
+				description: 'The type of the message to edit',
+			},
+			{
+				displayName: 'Chat ID',
+				name: 'chatId',
+				type: 'string',
+				default: '',
+				displayOptions: {
+					show: {
+						messageType: ['message'],
+						operation: ['editMessageText'],
+						resource: ['message'],
+					},
+				},
+				required: true,
+				description:
+					'Unique identifier for the target chat or username of the target channel (in the format @channelusername). To find your chat ID ask @get_id_bot.',
+			},
+			{
+				displayName: 'Message ID',
+				name: 'messageId',
+				type: 'string',
+				default: '',
+				displayOptions: {
+					show: {
+						messageType: ['message'],
+						operation: ['editMessageText'],
+						resource: ['message'],
+					},
+				},
+				required: true,
+				description: 'Unique identifier of the message to edit',
+			},
+			{
+				displayName: 'Inline Message ID',
+				name: 'inlineMessageId',
+				type: 'string',
+				default: '',
+				displayOptions: {
+					show: {
+						messageType: ['inlineMessage'],
+						operation: ['editMessageText'],
+						resource: ['message'],
+					},
+				},
+				required: true,
+				description: 'Unique identifier of the inline message to edit',
+			},
+			{
+				displayName: 'Reply Markup',
+				name: 'replyMarkup',
+				displayOptions: {
+					show: {
+						operation: ['editMessageText'],
+						resource: ['message'],
+					},
+				},
+				type: 'options',
+				options: [
+					{
+						name: 'None',
+						value: 'none',
+					},
+					{
+						name: 'Inline Keyboard',
+						value: 'inlineKeyboard',
+					},
+				],
+				default: 'none',
+				description: 'Additional interface options',
+			},
+			{
+				displayName: 'Disable Notification',
+				name: 'disable_notification',
+				type: 'boolean',
+				default: false,
+				displayOptions: {
+					show: {
+						operation: ['editMessageText'],
+					},
+				},
+				description:
+					'Whether to send the message silently. Users will receive a notification with no sound.',
+			},
+			// edit message
 
 			{
 				displayName: 'Chat ID',
@@ -146,16 +243,7 @@ export class BaleMessenger implements INodeType {
 				default: '',
 				displayOptions: {
 					show: {
-						operation: [
-							'sendDocument',
-							'sendMessage',
-							'sendPhoto',
-							'sendAudio',
-							'sendVideo',
-							'sendSticker',
-							'deleteMessage',
-							'sendChatAction',
-						],
+						operation: ['sendDocument', 'sendMessage', 'sendPhoto', 'sendAudio', 'sendVideo'],
 						resource: ['chat', 'message'],
 					},
 				},
@@ -171,7 +259,12 @@ export class BaleMessenger implements INodeType {
 				required: true,
 				displayOptions: {
 					show: {
-						operation: ['sendDocument', 'sendPhoto', 'sendAudio', 'sendVideo'],
+						operation: [
+							'sendDocument',
+							'sendPhoto',
+							'sendAudio',
+							'sendVideo',
+						],
 						resource: ['message'],
 					},
 				},
@@ -186,7 +279,12 @@ export class BaleMessenger implements INodeType {
 				required: true,
 				displayOptions: {
 					show: {
-						operation: ['sendDocument', 'sendPhoto', 'sendAudio', 'sendVideo', 'sendSticker'],
+						operation: [
+							'sendDocument',
+							'sendPhoto',
+							'sendAudio',
+							'sendVideo',
+						],
 						resource: ['message'],
 						binaryData: [true],
 					},
@@ -202,12 +300,15 @@ export class BaleMessenger implements INodeType {
 				default: '',
 				displayOptions: {
 					show: {
-						operation: ['sendDocument', 'sendPhoto', 'sendAudio', 'sendVideo'],
+						operation: [
+							'sendDocument', 'sendPhoto', 'sendAudio', 'sendVideo'
+						],
 						resource: ['message'],
 						binaryData: [false],
 					},
 				},
-				description: 'Pass a file_id to send a file that exists on the Bale servers',
+				description:
+					'Pass a file_id to send a file that exists on the Bale servers',
 			},
 
 			{
@@ -218,7 +319,7 @@ export class BaleMessenger implements INodeType {
 				default: '',
 				displayOptions: {
 					show: {
-						operation: ['sendMessage'],
+						operation: ['sendMessage', 'editMessageText'],
 						resource: ['message'],
 					},
 				},
@@ -230,7 +331,13 @@ export class BaleMessenger implements INodeType {
 				name: 'replyMarkup',
 				displayOptions: {
 					show: {
-						operation: ['sendDocument', 'sendMessage', 'sendPhoto', 'sendAudio', 'sendVideo'],
+						operation: [
+							'sendDocument',
+							'sendMessage',
+							'sendPhoto',
+							'sendAudio',
+							'sendVideo',
+						],
 						resource: ['message'],
 					},
 				},
@@ -413,122 +520,19 @@ export class BaleMessenger implements INodeType {
 					},
 				],
 			},
-			// amir nezami changes starts here \\
 			{
 				displayName: 'Reply To Message ID',
-				name: 'replyToMessageId',
+				name: 'reply_to_message_id',
 				type: 'number',
 				displayOptions: {
 					show: {
-						operation: [
-							'sendDocument',
-							'sendMessage',
-							'sendPhoto',
-							'sendAudio',
-							'sendVideo',
-							'sendSticker',
-						],
+						operation: ['sendDocument', 'sendMessage', 'sendPhoto', 'sendAudio', 'sendVideo', 'editMessageText'],
 						resource: ['chat', 'message'],
 					},
 				},
 				default: 0,
 				description: 'If the message is a reply, ID of the original message',
 			},
-			{
-				displayName: 'Sticker ID',
-				name: 'stickerId',
-				type: 'string',
-				default: '',
-				displayOptions: {
-					show: {
-						operation: ['sendSticker'],
-						resource: ['message'],
-					},
-				},
-				description:
-					'Sticker to send. Pass a file_id to send a file that exists on the Bale servers (recommended).',
-			},
-			{
-				displayName: 'Message ID',
-				name: 'messageId',
-				type: 'string',
-				default: '',
-				displayOptions: {
-					show: {
-						operation: ['deleteMessage'],
-						resource: ['message'],
-					},
-				},
-				required: true,
-				description: 'Unique identifier of the message to delete',
-			},
-			{
-				displayName: 'Action',
-				name: 'action',
-				type: 'options',
-				displayOptions: {
-					show: {
-						operation: ['sendChatAction'],
-						resource: ['message'],
-					},
-				},
-				options: [
-					{
-						name: 'Find Location',
-						value: 'find_location',
-						action: 'Find location',
-					},
-					{
-						name: 'Record Audio',
-						value: 'record_audio',
-						action: 'Record audio',
-					},
-					{
-						name: 'Record Video',
-						value: 'record_video',
-						action: 'Record video',
-					},
-					{
-						name: 'Record Video Note',
-						value: 'record_video_note',
-						action: 'Record video note',
-					},
-					{
-						name: 'Typing',
-						value: 'typing',
-						action: 'Typing a message',
-					},
-					{
-						name: 'Upload Audio',
-						value: 'upload_audio',
-						action: 'Upload audio',
-					},
-					{
-						name: 'Upload Document',
-						value: 'upload_document',
-						action: 'Upload document',
-					},
-					{
-						name: 'Upload Photo',
-						value: 'upload_photo',
-						action: 'Upload photo',
-					},
-					{
-						name: 'Upload Video',
-						value: 'upload_video',
-						action: 'Upload video',
-					},
-					{
-						name: 'Upload Video Note',
-						value: 'upload_video_note',
-						action: 'Upload video note',
-					},
-				],
-				default: 'typing',
-				description:
-					'Type of action to broadcast. Choose one, depending on what the user is about to receive. The status is set for 5 seconds or less (when a message arrives from your bot).',
-			},
-			// amir nezami changes ends here \\
 		],
 	};
 
@@ -539,20 +543,26 @@ export class BaleMessenger implements INodeType {
 		const credentials = await this.getCredentials('baleMessengerApi');
 		const binaryData = this.getNodeParameter('binaryData', 0, false);
 
+		// @ts-ignore
 		const bot = new TelegramBot(credentials.token as string, {
 			baseApiUrl: 'https://tapi.bale.ai',
 		});
 
+		// @ts-ignore
+		let endpoint: string;
+		let body: IDataObject;
 		for (let i = 0; i < items.length; i++) {
+
+			endpoint = '';
+			body = {};
+
 			const chatId = this.getNodeParameter('chatId', i) as string;
 
 			if (operation === 'sendMessage') {
 				const text = this.getNodeParameter('text', i) as string;
-				const replyToMessageId = this.getNodeParameter('replyToMessageId', i) as number;
 
 				const res = await bot.sendMessage(chatId, text, {
-					reply_markup: getMarkup.call(this, i),
-					reply_to_message_id: replyToMessageId,
+					reply_markup: getMarkup.call(this, i)
 				});
 				returnData.push({
 					json: {
@@ -561,48 +571,53 @@ export class BaleMessenger implements INodeType {
 					binary: {},
 					pairedItem: { item: i },
 				});
-			}
+			}else if (operation === 'editMessageText'){
 
-			if (operation === 'sendSticker') {
-				const stickerId = this.getNodeParameter('stickerId', i) as string;
-				const replyToMessageId = this.getNodeParameter('replyToMessageId', i) as number;
+				endpoint = 'editMessageText';
 
-				const res = await bot.sendSticker(chatId, stickerId, {
-					reply_to_message_id: replyToMessageId,
-				});
+				const messageType = this.getNodeParameter('messageType', i) as string;
+				let chat_id;
+				let message_id;
+				let text = body.text;
+				if (messageType === 'inlineMessage') {
+					body.inline_message_id = this.getNodeParameter('inlineMessageId', i) as string;
+				} else {
+					chat_id = this.getNodeParameter('chatId', i) as string;
+					message_id = this.getNodeParameter('messageId', i) as number;
+					// reply_markup = this.getNodeParameter('replyMarkup', i) as InlineKeyboardMarkup;
+				}
+
+				body.text = this.getNodeParameter('text', i) as string;
+
+				bot.editMessageText(body.text, {
+					chat_id: chat_id,
+					message_id: message_id,
+					reply_markup: getMarkup.call(this, i)
+				})
 
 				returnData.push({
 					json: {
-						...res,
+						text,
+						chat_id,
+						message_id,
 					},
 					binary: {},
 					pairedItem: { item: i },
-				});
-			}
+				})
 
-			if (operation === 'deleteMessage') {
-				const messageId = this.getNodeParameter('messageId', i) as number;
-
-				await bot.deleteMessage(chatId, messageId);
-
-				returnData.push({
-					json: {
-						messageDeleted: true,
-					},
-					binary: {},
-					pairedItem: { item: i },
-				});
+				// Add additional fields and replyMarkup
+				// addAdditionalFields.call(this, body, i);
 			}
 
 			if (['sendDocument', 'sendPhoto', 'sendAudio', 'sendVideo'].includes(operation)) {
 				let fileOptions = undefined;
 				let uploadData = undefined;
-				const options = { reply_markup: getMarkup.call(this, i) };
+				const options = { reply_markup: getMarkup.call(this, i) }
 				if (binaryData) {
 					const binaryPropertyName = this.getNodeParameter('binaryPropertyName', 0) as string;
 					const itemBinaryData = items[i].binary![binaryPropertyName];
 					uploadData = Buffer.from(itemBinaryData.data, BINARY_ENCODING);
-					fileOptions = { filename: itemBinaryData.fileName };
+					fileOptions = { filename: itemBinaryData.fileName }
 				} else {
 					// file_id passed
 					uploadData = this.getNodeParameter('fileId', 0) as string;
