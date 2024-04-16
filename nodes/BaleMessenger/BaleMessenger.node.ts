@@ -1,4 +1,4 @@
-import { INodeExecutionData, INodeType, INodeTypeDescription } from 'n8n-workflow';
+import { INodeExecutionData, INodeType, INodeTypeDescription, IDataObject, NodeOperationError } from 'n8n-workflow';
 import { BINARY_ENCODING, IExecuteFunctions } from 'n8n-core';
 import { default as TelegramBot } from 'node-telegram-bot-api';
 
@@ -135,9 +135,69 @@ export class BaleMessenger implements INodeType {
 						description: 'Send a video',
 						action: 'Send a video',
 					},
+					{
+						name: 'Edit Message Text',
+						value: 'editMessageText',
+						description: 'Edit a text message',
+						action: 'Edit a test message',
+					},
 				],
 				default: 'sendMessage',
 			},
+
+			// edit message
+			{
+				displayName: 'Message Type',
+				name: 'messageType',
+				type: 'options',
+				displayOptions: {
+					show: {
+						operation: ['editMessageText'],
+						resource: ['message'],
+					},
+				},
+				options: [
+					{
+						name: 'Inline Message',
+						value: 'inlineMessage',
+					},
+					{
+						name: 'Message',
+						value: 'message',
+					},
+				],
+				default: 'message',
+				description: 'The type of the message to edit',
+			},
+			{
+				displayName: 'Inline Message ID',
+				name: 'inlineMessageId',
+				type: 'string',
+				default: '',
+				displayOptions: {
+					show: {
+						messageType: ['inlineMessage'],
+						operation: ['editMessageText'],
+						resource: ['message'],
+					},
+				},
+				required: true,
+				description: 'Unique identifier of the inline message to edit',
+			},
+			{
+				displayName: 'Disable Notification',
+				name: 'disable_notification',
+				type: 'boolean',
+				default: false,
+				displayOptions: {
+					show: {
+						operation: ['editMessageText'],
+					},
+				},
+				description:
+					'Whether to send the message silently. Users will receive a notification with no sound.',
+			},
+			// edit message
 
 			{
 				displayName: 'Chat ID',
@@ -155,6 +215,7 @@ export class BaleMessenger implements INodeType {
 							'sendSticker',
 							'deleteMessage',
 							'sendChatAction',
+							'editMessageText'
 						],
 						resource: ['chat', 'message'],
 					},
@@ -218,7 +279,7 @@ export class BaleMessenger implements INodeType {
 				default: '',
 				displayOptions: {
 					show: {
-						operation: ['sendMessage'],
+						operation: ['sendMessage', 'editMessageText'],
 						resource: ['message'],
 					},
 				},
@@ -230,7 +291,7 @@ export class BaleMessenger implements INodeType {
 				name: 'replyMarkup',
 				displayOptions: {
 					show: {
-						operation: ['sendDocument', 'sendMessage', 'sendPhoto', 'sendAudio', 'sendVideo'],
+						operation: ['sendDocument', 'sendMessage', 'sendPhoto', 'sendAudio', 'sendVideo', 'editMessageText'],
 						resource: ['message'],
 					},
 				},
@@ -455,7 +516,7 @@ export class BaleMessenger implements INodeType {
 				default: '',
 				displayOptions: {
 					show: {
-						operation: ['deleteMessage'],
+						operation: ['deleteMessage', 'editMessageText'],
 						resource: ['message'],
 					},
 				},
@@ -543,24 +604,69 @@ export class BaleMessenger implements INodeType {
 			baseApiUrl: 'https://tapi.bale.ai',
 		});
 
+		let body: IDataObject;
+
 		for (let i = 0; i < items.length; i++) {
+
+			body = {};
+
 			const chatId = this.getNodeParameter('chatId', i) as string;
 
 			if (operation === 'sendMessage') {
-				const text = this.getNodeParameter('text', i) as string;
-				const replyToMessageId = this.getNodeParameter('replyToMessageId', i) as number;
+				try{
+					const text = this.getNodeParameter('text', i) as string;
 
-				const res = await bot.sendMessage(chatId, text, {
-					reply_markup: getMarkup.call(this, i),
-					reply_to_message_id: replyToMessageId,
-				});
+					const res = await bot.sendMessage(chatId, text, {
+						reply_markup: getMarkup.call(this, i)
+					});
+					returnData.push({
+						json: {
+							...res,
+						},
+						binary: {},
+						pairedItem: { item: i },
+					});
+
+				}catch(err){
+
+					throw new NodeOperationError(this.getNode(), `bad request - chat not found`);
+
+				}
+			}else if (operation === 'editMessageText'){
+
+				const messageType = this.getNodeParameter('messageType', i) as string;
+				let chat_id;
+				let message_id;
+				let Text;
+				if (messageType === 'inlineMessage') {
+					body.inline_message_id = this.getNodeParameter('inlineMessageId', i) as string;
+				} else {
+					chat_id = this.getNodeParameter('chatId', i) as string;
+					message_id = this.getNodeParameter('messageId', i) as number;
+					// reply_markup = this.getNodeParameter('replyMarkup', i) as InlineKeyboardMarkup;
+				}
+
+				body.text = this.getNodeParameter('text', i) as string;
+				Text = body.text;
+
+				bot.editMessageText(body.text, {
+					chat_id: chat_id,
+					message_id: message_id,
+					reply_markup: getMarkup.call(this, i)
+				})
+
 				returnData.push({
 					json: {
-						...res,
+						Text,
+						chat_id,
+						message_id,
 					},
 					binary: {},
 					pairedItem: { item: i },
-				});
+				})
+
+				// Add additional fields and replyMarkup
+				// addAdditionalFields.call(this, body, i);
 			}
 
 			if (operation === 'sendSticker') {
