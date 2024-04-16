@@ -170,37 +170,6 @@ export class BaleMessenger implements INodeType {
 				description: 'The type of the message to edit',
 			},
 			{
-				displayName: 'Chat ID',
-				name: 'chatId',
-				type: 'string',
-				default: '',
-				displayOptions: {
-					show: {
-						messageType: ['message'],
-						operation: ['editMessageText'],
-						resource: ['message'],
-					},
-				},
-				required: true,
-				description:
-					'Unique identifier for the target chat or username of the target channel (in the format @channelusername). To find your chat ID ask @get_id_bot.',
-			},
-			{
-				displayName: 'Message ID',
-				name: 'messageId',
-				type: 'string',
-				default: '',
-				displayOptions: {
-					show: {
-						messageType: ['message'],
-						operation: ['editMessageText'],
-						resource: ['message'],
-					},
-				},
-				required: true,
-				description: 'Unique identifier of the message to edit',
-			},
-			{
 				displayName: 'Inline Message ID',
 				name: 'inlineMessageId',
 				type: 'string',
@@ -214,29 +183,6 @@ export class BaleMessenger implements INodeType {
 				},
 				required: true,
 				description: 'Unique identifier of the inline message to edit',
-			},
-			{
-				displayName: 'Reply Markup',
-				name: 'replyMarkup',
-				displayOptions: {
-					show: {
-						operation: ['editMessageText'],
-						resource: ['message'],
-					},
-				},
-				type: 'options',
-				options: [
-					{
-						name: 'None',
-						value: 'none',
-					},
-					{
-						name: 'Inline Keyboard',
-						value: 'inlineKeyboard',
-					},
-				],
-				default: 'none',
-				description: 'Additional interface options',
 			},
 			{
 				displayName: 'Disable Notification',
@@ -269,6 +215,7 @@ export class BaleMessenger implements INodeType {
 							'sendSticker',
 							'deleteMessage',
 							'sendChatAction',
+							'editMessageText'
 						],
 						resource: ['chat', 'message'],
 					},
@@ -344,7 +291,7 @@ export class BaleMessenger implements INodeType {
 				name: 'replyMarkup',
 				displayOptions: {
 					show: {
-						operation: ['sendDocument', 'sendMessage', 'sendPhoto', 'sendAudio', 'sendVideo'],
+						operation: ['sendDocument', 'sendMessage', 'sendPhoto', 'sendAudio', 'sendVideo', 'editMessageText'],
 						resource: ['message'],
 					},
 				},
@@ -569,7 +516,7 @@ export class BaleMessenger implements INodeType {
 				default: '',
 				displayOptions: {
 					show: {
-						operation: ['deleteMessage'],
+						operation: ['deleteMessage', 'editMessageText'],
 						resource: ['message'],
 					},
 				},
