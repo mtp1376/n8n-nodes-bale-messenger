@@ -1,4 +1,10 @@
-import { INodeExecutionData, INodeType, INodeTypeDescription, IDataObject, NodeOperationError } from 'n8n-workflow';
+import {
+	INodeExecutionData,
+	INodeType,
+	INodeTypeDescription,
+	IDataObject,
+	NodeOperationError,
+} from 'n8n-workflow';
 import { BINARY_ENCODING, IExecuteFunctions } from 'n8n-core';
 import { default as TelegramBot } from 'node-telegram-bot-api';
 
@@ -94,6 +100,12 @@ export class BaleMessenger implements INodeType {
 						action: 'Delete a chat message',
 					},
 					{
+						name: 'Edit Message Text',
+						value: 'editMessageText',
+						description: 'Edit a text message',
+						action: 'Edit a test message',
+					},
+					{
 						name: 'Send Audio',
 						value: 'sendAudio',
 						description: 'Send an audio file',
@@ -134,12 +146,6 @@ export class BaleMessenger implements INodeType {
 						value: 'sendVideo',
 						description: 'Send a video',
 						action: 'Send a video',
-					},
-					{
-						name: 'Edit Message Text',
-						value: 'editMessageText',
-						description: 'Edit a text message',
-						action: 'Edit a test message',
 					},
 				],
 				default: 'sendMessage',
@@ -215,7 +221,7 @@ export class BaleMessenger implements INodeType {
 							'sendSticker',
 							'deleteMessage',
 							'sendChatAction',
-							'editMessageText'
+							'editMessageText',
 						],
 						resource: ['chat', 'message'],
 					},
@@ -291,7 +297,14 @@ export class BaleMessenger implements INodeType {
 				name: 'replyMarkup',
 				displayOptions: {
 					show: {
-						operation: ['sendDocument', 'sendMessage', 'sendPhoto', 'sendAudio', 'sendVideo', 'editMessageText'],
+						operation: [
+							'sendDocument',
+							'sendMessage',
+							'sendPhoto',
+							'sendAudio',
+							'sendVideo',
+							'editMessageText',
+						],
 						resource: ['message'],
 					},
 				},
@@ -607,17 +620,16 @@ export class BaleMessenger implements INodeType {
 		let body: IDataObject;
 
 		for (let i = 0; i < items.length; i++) {
-
 			body = {};
 
 			const chatId = this.getNodeParameter('chatId', i) as string;
 
 			if (operation === 'sendMessage') {
-				try{
+				try {
 					const text = this.getNodeParameter('text', i) as string;
 
 					const res = await bot.sendMessage(chatId, text, {
-						reply_markup: getMarkup.call(this, i)
+						reply_markup: getMarkup.call(this, i),
 					});
 					returnData.push({
 						json: {
@@ -630,10 +642,8 @@ export class BaleMessenger implements INodeType {
 				}catch(err){
 
 					//throw new NodeOperationError(this.getNode(), `bad request - chat not found`);
-
 				}
-			}else if (operation === 'editMessageText'){
-
+			} else if (operation === 'editMessageText') {
 				const messageType = this.getNodeParameter('messageType', i) as string;
 				let chat_id;
 				let message_id;
@@ -652,8 +662,8 @@ export class BaleMessenger implements INodeType {
 				bot.editMessageText(body.text, {
 					chat_id: chat_id,
 					message_id: message_id,
-					reply_markup: getMarkup.call(this, i)
-				})
+					reply_markup: getMarkup.call(this, i),
+				});
 
 				returnData.push({
 					json: {
@@ -663,7 +673,7 @@ export class BaleMessenger implements INodeType {
 					},
 					binary: {},
 					pairedItem: { item: i },
-				})
+				});
 
 				// Add additional fields and replyMarkup
 				// addAdditionalFields.call(this, body, i);

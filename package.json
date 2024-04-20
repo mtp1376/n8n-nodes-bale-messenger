@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-bale-messenger",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "description": "Bale Messenger API consumer for n8n",
   "keywords": [
     "n8n-community-node-package"
