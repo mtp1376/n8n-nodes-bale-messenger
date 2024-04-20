@@ -638,8 +638,10 @@ export class BaleMessenger implements INodeType {
 						binary: {},
 						pairedItem: { item: i },
 					});
-				} catch (err) {
-					throw new NodeOperationError(this.getNode(), `bad request - chat not found`);
+
+				}catch(err){
+
+					//throw new NodeOperationError(this.getNode(), `bad request - chat not found`);
 				}
 			} else if (operation === 'editMessageText') {
 				const messageType = this.getNodeParameter('messageType', i) as string;
