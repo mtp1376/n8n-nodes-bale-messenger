@@ -291,6 +291,24 @@ export class BaleMessenger implements INodeType {
 				},
 				description: 'Text of the message to be sent',
 			},
+			
+			{
+				displayName: 'Caption',
+				name: 'caption',
+				type: 'string',
+				displayOptions: {
+					show: {
+						operation: [
+							'sendAudio',
+							'sendDocument',
+							'sendPhoto',
+							'sendVideo',
+						],
+					},
+				},
+				default: '',
+				description: 'Caption text to set, 0-1024 characters',
+			},
 
 			{
 				displayName: 'Reply Markup',
