@@ -713,6 +713,7 @@ export class BaleMessenger implements INodeType {
 			if (['sendDocument', 'sendPhoto', 'sendAudio', 'sendVideo'].includes(operation)) {
 				let fileOptions = undefined;
 				let uploadData = undefined;
+				let response = undefined;
 				const options = { reply_markup: getMarkup.call(this, i) };
 				if (binaryData) {
 					const binaryPropertyName = this.getNodeParameter('binaryPropertyName', 0) as string;
@@ -725,13 +726,22 @@ export class BaleMessenger implements INodeType {
 				}
 
 				if (operation === 'sendDocument')
-					await bot.sendDocument(chatId, uploadData, options, fileOptions);
+					response = await bot.sendDocument(chatId, uploadData, options, fileOptions);
 				else if (operation === 'sendPhoto')
-					await bot.sendPhoto(chatId, uploadData, options, fileOptions);
+					response = await bot.sendPhoto(chatId, uploadData, options, fileOptions);
 				else if (operation === 'sendAudio')
-					await bot.sendAudio(chatId, uploadData, options, fileOptions);
+					response = await bot.sendAudio(chatId, uploadData, options, fileOptions);
 				else if (operation === 'sendVideo')
-					await bot.sendVideo(chatId, uploadData, options, fileOptions);
+					response = await bot.sendVideo(chatId, uploadData, options, fileOptions);
+
+
+				returnData.push({
+					json: {
+						...response,
+					},
+					binary: {},
+					pairedItem: { item: i },
+				});
 			}
 		}
 
